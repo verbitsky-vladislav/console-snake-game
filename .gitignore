@@ -5,6 +5,7 @@ pkg/mod/
 .idea/
 .vscode/
 *.swp
+/.idea
 
 # Файлы сборки и артефакты
 _build/
