@@ -13,7 +13,7 @@ type Point struct {
 
 var (
 	snake        []Point
-	food         Point
+	food         []Point
 	direction    Point
 	screenWidth  int
 	screenHeight int
@@ -24,8 +24,17 @@ func initGame() {
 	rand.Seed(time.Now().UnixNano())
 	screenWidth, screenHeight = termbox.Size()
 	snake = []Point{{screenWidth / 2, screenHeight / 2}}
-	food = Point{rand.Intn(screenWidth), rand.Intn(screenHeight)}
+	food = generateFood()
 	direction = Point{0, -1}
+}
+
+func generateFood() []Point {
+	foodCount := rand.Intn(10) + 1 // Генерируем от 1 до 10 объектов еды
+	food := make([]Point, foodCount)
+	for i := 0; i < foodCount; i++ {
+		food[i] = Point{rand.Intn(screenWidth), rand.Intn(screenHeight)}
+	}
+	return food
 }
 
 func draw() {
@@ -33,7 +42,9 @@ func draw() {
 	for _, p := range snake {
 		termbox.SetCell(p.x, p.y, 'O', termbox.ColorGreen, termbox.ColorDefault)
 	}
-	termbox.SetCell(food.x, food.y, 'X', termbox.ColorRed, termbox.ColorDefault)
+	for _, f := range food {
+		termbox.SetCell(f.x, f.y, 'X', termbox.ColorRed, termbox.ColorDefault)
+	}
 	termbox.Flush()
 }
 
@@ -59,7 +70,7 @@ func handleInput() {
 				if direction.x == 0 {
 					direction = Point{1, 0}
 				}
-			case termbox.KeyEsc:
+			case termbox.KeyCtrlC:
 				termbox.Close()
 				return
 			}
@@ -85,11 +96,15 @@ func update() {
 		newHead.y = screenHeight - 1
 	}
 
-	if newHead.x == food.x && newHead.y == food.y {
-		food = Point{rand.Intn(screenWidth), rand.Intn(screenHeight)}
-	} else {
-		snake = snake[:len(snake)-1]
+	for i, f := range food {
+		if newHead.x == f.x && newHead.y == f.y {
+			food = append(food[:i], food[i+1:]...)                                      // Удалить съеденную еду
+			food = append(food, Point{rand.Intn(screenWidth), rand.Intn(screenHeight)}) // Добавить новую еду
+			goto SkipReduction
+		}
 	}
+	snake = snake[:len(snake)-1] // Удалить хвост, если еда не съедена
+SkipReduction:
 	snake = append([]Point{newHead}, snake...)
 }
 
