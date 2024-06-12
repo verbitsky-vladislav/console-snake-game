@@ -1,6 +1,9 @@
 package game
 
-import "math/rand"
+import (
+	"math/rand"
+	"snake-game/utils"
+)
 
 func (s *Snake) UpdateAI(food *FoodManager, player *Snake) {
 	if !s.isAlive {
@@ -9,12 +12,12 @@ func (s *Snake) UpdateAI(food *FoodManager, player *Snake) {
 
 	// Простой ИИ для поиска ближайшей еды
 	closestFood := food.GetClosest(s.body[0])
-	minDistance := distance(s.body[0], closestFood)
+	minDistance := utils.Distance(s.body[0], closestFood)
 
 	// Если змея больше игрока, она пытается его преследовать
 	if s.Length() > player.Length() {
 		playerHead := player.body[0]
-		playerDistance := distance(s.body[0], playerHead)
+		playerDistance := utils.Distance(s.body[0], playerHead)
 		if playerDistance < minDistance {
 			closestFood = playerHead
 			minDistance = playerDistance
@@ -25,25 +28,25 @@ func (s *Snake) UpdateAI(food *FoodManager, player *Snake) {
 	s.moveToTarget(closestFood)
 
 	// Проверка на столкновение с другими змеями и игроком
-	newHead := Point{s.body[0].x + s.direction.x, s.body[0].y + s.direction.y}
+	newHead := utils.Point{s.body[0].X + s.direction.X, s.body[0].Y + s.direction.Y}
 	if s.checkCollision(newHead, player) || s.checkCollisionWithAISnakes(newHead) {
 		s.changeDirection()
-		newHead = Point{s.body[0].x + s.direction.x, s.body[0].y + s.direction.y}
+		newHead = utils.Point{s.body[0].X + s.direction.X, s.body[0].Y + s.direction.Y}
 	}
 
 	s.Update(food)
 }
 
-func (s *Snake) checkCollision(newHead Point, other *Snake) bool {
+func (s *Snake) checkCollision(newHead utils.Point, other *Snake) bool {
 	for _, p := range other.body {
-		if p.x == newHead.x && p.y == newHead.y {
+		if p.X == newHead.X && p.Y == newHead.Y {
 			return true
 		}
 	}
 	return false
 }
 
-func (s *Snake) checkCollisionWithAISnakes(newHead Point) bool {
+func (s *Snake) checkCollisionWithAISnakes(newHead utils.Point) bool {
 	for _, aiSnake := range s.game.aiSnakes {
 		if aiSnake != s && aiSnake.isAlive && s.checkCollision(newHead, aiSnake) {
 			return true
@@ -54,7 +57,7 @@ func (s *Snake) checkCollisionWithAISnakes(newHead Point) bool {
 
 func (s *Snake) changeDirection() {
 	// Метод для изменения направления, если возникает столкновение
-	directions := []Point{
+	directions := []utils.Point{
 		{0, 1},  // вниз
 		{0, -1}, // вверх
 		{1, 0},  // вправо
@@ -64,11 +67,11 @@ func (s *Snake) changeDirection() {
 	// Пробуем каждое направление, пока не найдем валидное
 	for _, dir := range directions {
 		// Проверка на противоположное направление
-		if dir.x == -s.direction.x && dir.y == -s.direction.y {
+		if dir.X == -s.direction.X && dir.Y == -s.direction.Y {
 			continue
 		}
 
-		newHead := Point{s.body[0].x + dir.x, s.body[0].y + dir.y}
+		newHead := utils.Point{s.body[0].X + dir.X, s.body[0].Y + dir.Y}
 		if !s.checkCollision(newHead, s) && !s.checkCollisionWithAISnakes(newHead) {
 			s.direction = dir
 			return
@@ -79,14 +82,14 @@ func (s *Snake) changeDirection() {
 	s.direction = directions[rand.Intn(len(directions))]
 }
 
-func (s *Snake) moveToTarget(target Point) {
-	if target.x < s.body[0].x && s.direction.x != 1 {
-		s.direction = Point{-1, 0}
-	} else if target.x > s.body[0].x && s.direction.x != -1 {
-		s.direction = Point{1, 0}
-	} else if target.y < s.body[0].y && s.direction.y != 1 {
-		s.direction = Point{0, -1}
-	} else if target.y > s.body[0].y && s.direction.y != -1 {
-		s.direction = Point{0, 1}
+func (s *Snake) moveToTarget(target utils.Point) {
+	if target.X < s.body[0].X && s.direction.X != 1 {
+		s.direction = utils.Point{-1, 0}
+	} else if target.X > s.body[0].X && s.direction.X != -1 {
+		s.direction = utils.Point{1, 0}
+	} else if target.Y < s.body[0].Y && s.direction.Y != 1 {
+		s.direction = utils.Point{0, -1}
+	} else if target.Y > s.body[0].Y && s.direction.Y != -1 {
+		s.direction = utils.Point{0, 1}
 	}
 }

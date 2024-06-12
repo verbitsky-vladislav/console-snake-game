@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/nsf/termbox-go"
-	"math/rand"
 	"snake-game/game"
-	"time"
+	base "snake-game/simulation"
+	"snake-game/ui"
 )
 
 func main() {
@@ -15,24 +15,45 @@ func main() {
 	}
 	defer termbox.Close()
 
-	rand.Seed(time.Now().UnixNano())
+	mode := selectMode()
 
-	// Выбор количества AI-змей
-	numAISnakes := selectAISnakes()
+	if mode == 1 {
+		numAISnakes := selectAISnakes()
+		g := game.NewGame(numAISnakes)
+		go ui.HandleInput(g)
+		g.Start()
+	} else if mode == 2 {
+		s := base.NewSimulation()
+		s.Initialize()
+		go ui.HandleInput(s)
+		s.Run()
+	} else {
+		fmt.Println("Invalid mode selected")
+	}
+}
 
-	g := game.NewGame(numAISnakes)
-	g.Start()
+func selectMode() uint8 {
+	var mode uint8
+	fmt.Println("Выберите режим: game (1) или simulation (2)")
+	for {
+		fmt.Scan(&mode)
+		if mode == 1 || mode == 2 {
+			break
+		}
+		fmt.Println("Пожалуйста, введите game или simulation.")
+	}
+	return mode
 }
 
 func selectAISnakes() int {
 	var numAISnakes int
-	fmt.Println("Выберите количество AI змей (от 0 до 6):")
+	fmt.Println("Выберите количество AI змей (от 0 до 5):")
 	for {
 		fmt.Scan(&numAISnakes)
-		if numAISnakes >= 0 && numAISnakes <= 6 {
+		if numAISnakes >= 0 && numAISnakes <= 5 {
 			break
 		}
-		fmt.Println("Пожалуйста, введите число от 0 до 6.")
+		fmt.Println("Пожалуйста, введите число от 0 до 5.")
 	}
 	return numAISnakes
 }

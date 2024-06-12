@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/nsf/termbox-go"
 	"math/rand"
+	"snake-game/utils"
 	"sync"
 	"time"
 )
@@ -63,20 +64,20 @@ func (g *Game) handleInput() {
 			} else {
 				switch ev.Key {
 				case termbox.KeyArrowUp:
-					if g.player.direction.y == 0 {
-						g.player.direction = Point{0, -1}
+					if g.player.direction.Y == 0 {
+						g.player.direction = utils.Point{0, -1}
 					}
 				case termbox.KeyArrowDown:
-					if g.player.direction.y == 0 {
-						g.player.direction = Point{0, 1}
+					if g.player.direction.Y == 0 {
+						g.player.direction = utils.Point{0, 1}
 					}
 				case termbox.KeyArrowLeft:
-					if g.player.direction.x == 0 {
-						g.player.direction = Point{-1, 0}
+					if g.player.direction.X == 0 {
+						g.player.direction = utils.Point{-1, 0}
 					}
 				case termbox.KeyArrowRight:
-					if g.player.direction.x == 0 {
-						g.player.direction = Point{1, 0}
+					if g.player.direction.X == 0 {
+						g.player.direction = utils.Point{1, 0}
 					}
 				case termbox.KeyCtrlC:
 					termbox.Close()
@@ -149,33 +150,11 @@ func (g *Game) checkCollisions() {
 
 func (g *Game) draw() {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	drawBorders()
+	utils.DrawBorders()
 	g.player.Draw()
 	for _, aiSnake := range g.aiSnakes {
 		aiSnake.Draw()
 	}
 	g.food.Draw()
 	termbox.Flush()
-}
-
-func drawBorders() {
-	screenWidth, screenHeight := termbox.Size()
-	for x := 0; x < screenWidth; x++ {
-		termbox.SetCell(x, 0, '#', termbox.ColorWhite, termbox.ColorDefault)
-		termbox.SetCell(x, screenHeight-1, '#', termbox.ColorWhite, termbox.ColorDefault)
-	}
-	for y := 0; y < screenHeight; y++ {
-		termbox.SetCell(0, y, '#', termbox.ColorWhite, termbox.ColorDefault)
-		termbox.SetCell(screenWidth-1, y, '#', termbox.ColorWhite, termbox.ColorDefault)
-	}
-}
-
-func drawGameOver() {
-	screenWidth, screenHeight := termbox.Size()
-	message := "Game Over! Press ESC to exit or Enter to restart."
-	x := (screenWidth - len(message)) / 2
-	y := screenHeight / 2
-	for i, ch := range message {
-		termbox.SetCell(x+i, y, ch, termbox.ColorRed, termbox.ColorDefault)
-	}
 }

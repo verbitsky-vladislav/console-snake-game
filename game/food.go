@@ -3,10 +3,11 @@ package game
 import (
 	"github.com/nsf/termbox-go"
 	"math/rand"
+	"snake-game/utils"
 )
 
 type FoodManager struct {
-	food         []Point
+	food         []utils.Point
 	screenWidth  int
 	screenHeight int
 	rng          *rand.Rand
@@ -23,9 +24,9 @@ func NewFoodManager(screenWidth, screenHeight int, rng *rand.Rand) *FoodManager 
 	}
 }
 
-func generateFood(screenWidth, screenHeight int, rng *rand.Rand, snakes []*Snake, player *Snake) []Point {
+func generateFood(screenWidth, screenHeight int, rng *rand.Rand, snakes []*Snake, player *Snake) []utils.Point {
 	foodCount := rng.Intn(10) + 1 // Генерируем от 1 до 10 объектов еды
-	food := make([]Point, 0, foodCount)
+	food := make([]utils.Point, 0, foodCount)
 	for i := 0; i < foodCount; i++ {
 		newFood := generateValidFoodPoint(screenWidth, screenHeight, rng, snakes, player)
 		food = append(food, newFood)
@@ -33,16 +34,16 @@ func generateFood(screenWidth, screenHeight int, rng *rand.Rand, snakes []*Snake
 	return food
 }
 
-func generateValidFoodPoint(screenWidth, screenHeight int, rng *rand.Rand, snakes []*Snake, player *Snake) Point {
+func generateValidFoodPoint(screenWidth, screenHeight int, rng *rand.Rand, snakes []*Snake, player *Snake) utils.Point {
 	for {
-		newFood := Point{rng.Intn(screenWidth-2) + 1, rng.Intn(screenHeight-2) + 1}
+		newFood := utils.Point{rng.Intn(screenWidth-2) + 1, rng.Intn(screenHeight-2) + 1}
 		if !isPositionOccupied(newFood, snakes, player) {
 			return newFood
 		}
 	}
 }
 
-func isPositionOccupied(point Point, snakes []*Snake, player *Snake) bool {
+func isPositionOccupied(point utils.Point, snakes []*Snake, player *Snake) bool {
 	if player != nil {
 		for _, segment := range player.body {
 			if segment == point {
@@ -60,9 +61,9 @@ func isPositionOccupied(point Point, snakes []*Snake, player *Snake) bool {
 	return false
 }
 
-func (fm *FoodManager) Eat(p Point, snakes []*Snake, player *Snake) bool {
+func (fm *FoodManager) Eat(p utils.Point, snakes []*Snake, player *Snake) bool {
 	for i, f := range fm.food {
-		if f.x == p.x && f.y == p.y {
+		if f.X == p.X && f.Y == p.Y {
 			fm.food = append(fm.food[:i], fm.food[i+1:]...) // Удалить съеденную еду
 			if len(fm.food) < fm.maxFood {
 				newFoodCount := fm.rng.Intn(3) + 1 // Добавляем от 1 до 3 объектов еды
@@ -77,14 +78,14 @@ func (fm *FoodManager) Eat(p Point, snakes []*Snake, player *Snake) bool {
 	return false
 }
 
-func (fm *FoodManager) GetClosest(p Point) Point {
+func (fm *FoodManager) GetClosest(p utils.Point) utils.Point {
 	if len(fm.food) == 0 {
-		return Point{-1, -1} // Если нет еды, возвращаем невалидную точку
+		return utils.Point{-1, -1} // Если нет еды, возвращаем невалидную точку
 	}
 	closestFood := fm.food[0]
-	minDistance := distance(p, closestFood)
+	minDistance := utils.Distance(p, closestFood)
 	for _, f := range fm.food {
-		d := distance(p, f)
+		d := utils.Distance(p, f)
 		if d < minDistance {
 			minDistance = d
 			closestFood = f
@@ -95,6 +96,6 @@ func (fm *FoodManager) GetClosest(p Point) Point {
 
 func (fm *FoodManager) Draw() {
 	for _, f := range fm.food {
-		termbox.SetCell(f.x, f.y, 'X', termbox.ColorRed, termbox.ColorDefault)
+		termbox.SetCell(f.X, f.Y, 'X', termbox.ColorRed, termbox.ColorDefault)
 	}
 }
