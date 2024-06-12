@@ -12,7 +12,8 @@ var snakeColors = []termbox.Attribute{
 	termbox.ColorCyan,
 	termbox.ColorMagenta,
 	termbox.ColorBlue,
-	termbox.ColorRed,
+	termbox.ColorWhite,
+	termbox.ColorLightGray,
 }
 
 type Game struct {

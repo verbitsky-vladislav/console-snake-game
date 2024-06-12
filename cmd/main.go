@@ -26,13 +26,13 @@ func main() {
 
 func selectAISnakes() int {
 	var numAISnakes int
-	fmt.Println("Выберите количество AI змей (от 0 до 5):")
+	fmt.Println("Выберите количество AI змей (от 0 до 6):")
 	for {
 		fmt.Scan(&numAISnakes)
-		if numAISnakes >= 0 && numAISnakes <= 5 {
+		if numAISnakes >= 0 && numAISnakes <= 6 {
 			break
 		}
-		fmt.Println("Пожалуйста, введите число от 0 до 5.")
+		fmt.Println("Пожалуйста, введите число от 0 до 6.")
 	}
 	return numAISnakes
 }
