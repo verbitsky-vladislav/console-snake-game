@@ -1,31 +1,31 @@
-package snake
+package base
 
 import (
 	"math/rand"
-	"snake-game/simulation/food"
+	"snake-game/utils"
 )
 
 type Algorithm interface {
-	Move(snake *BaseSnake, food []*food.Food)
+	Move(snake *BaseSnake, food []*utils.Point)
 }
 
 type AlgorithmType int
 
 const (
-	AStar AlgorithmType = iota
-	Dijkstra
-	Wavefront
-	Pathfinding
-	Navmesh
-	Hierarchical
-	ObstacleAvoidance
-	DivideAndConquer
-	KreisTurn
+	//AStar AlgorithmType = iota
+	Dijkstra AlgorithmType = iota
+	//Wavefront
+	//Pathfinding
+	//Navmesh
+	//Hierarchical
+	//ObstacleAvoidance
+	//DivideAndConquer
+	//KreisTurn
 )
 
 var MovementAlgorithms = []Algorithm{
-	&AStarMovement{},
-	//&DijkstraMovement{},
+	//&AStarMovement{},
+	&DijkstraMovement{},
 	//&WavefrontMovement{},
 	//&PathfindingMovement{},
 	//&NavmeshMovement{},

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/nsf/termbox-go"
 	"snake-game/game"
-	base "snake-game/simulation"
+	"snake-game/simulation/base"
 	"snake-game/ui"
 )
 
@@ -23,10 +23,9 @@ func main() {
 		go ui.HandleInput(g)
 		g.Start()
 	} else if mode == 2 {
-		s := base.NewSimulation()
-		s.Initialize()
-		go ui.HandleInput(s)
-		s.Run()
+		sim := base.NewSimulation(1)
+		//go ui.HandleInput(sim)
+		sim.Start()
 	} else {
 		fmt.Println("Invalid mode selected")
 	}

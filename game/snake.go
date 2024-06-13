@@ -18,7 +18,7 @@ type Snake struct {
 func NewSnake(x, y int, color termbox.Attribute, game *Game, isPlayer bool) *Snake {
 	return &Snake{
 		body:      []utils.Point{{x, y}},
-		direction: utils.Point{0, -1},
+		direction: utils.Point{Y: -1},
 		color:     color,
 		isAlive:   true,
 		game:      game, // Инициализируем ссылку на игру
