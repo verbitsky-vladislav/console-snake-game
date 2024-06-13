@@ -18,10 +18,9 @@ var snakeColors = []termbox.Attribute{
 }
 
 type Simulation struct {
-	Snakes     []*BaseSnake
-	Food       *Manager
-	Mu         sync.Mutex
-	newSnakeCh chan *BaseSnake // Буферизированный канал для добавления новых змей
+	Snakes []*BaseSnake
+	Food   *Manager
+	Mu     sync.Mutex
 }
 
 func NewSimulation(numStartSnakes int) *Simulation {
@@ -49,7 +48,6 @@ func NewSimulation(numStartSnakes int) *Simulation {
 	// Возвращаем новый экземпляр симуляции
 	simulation.Food = foods
 	simulation.Snakes = snakes
-	simulation.newSnakeCh = make(chan *BaseSnake, 100) // Увеличиваем размер буфера канала
 
 	return &simulation
 }
@@ -62,22 +60,19 @@ func (sim *Simulation) Start() {
 func (sim *Simulation) AddSnake(newSnake *BaseSnake) {
 	utils.LogInfo.Println("Attempting to add a new snake")
 
-	//sim.Mu.Lock()
-	//defer sim.Mu.Unlock()
-
-	// Запускаем обновление новой змеи в отдельной горутине перед добавлением в список
-	//go func() {
-	//	for range time.Tick(100 * time.Millisecond) {
-	//		sim.Mu.Lock()
-	//		newSnake.Update(sim.Food)
-	//		sim.Mu.Unlock()
-	//	}
-	//}()
-
-	// Добавляем новую змею к симуляции напрямую
 	sim.Snakes = append(sim.Snakes, newSnake)
 
 	utils.LogInfo.Println("New snake added to list")
+}
+
+func (sim *Simulation) RemoveSnake(snake *BaseSnake) {
+	for i, s := range sim.Snakes {
+		if s == snake {
+			utils.LogInfo.Printf("Removing snake at (%d, %d) from simulation", s.Body[0].X, s.Body[0].Y)
+			sim.Snakes = append(sim.Snakes[:i], sim.Snakes[i+1:]...)
+			break
+		}
+	}
 }
 
 func (sim *Simulation) gameLoop() {
@@ -87,53 +82,38 @@ func (sim *Simulation) gameLoop() {
 		sim.update()
 		sim.draw()
 		sim.Mu.Unlock()
-
-		// Обработка канала для добавления новых змей
-		//select {
-		//case newSnake := <-sim.newSnakeCh:
-		//	utils.LogInfo.Println("New snake added from channel to list")
-		//	sim.Snakes = append(sim.Snakes, newSnake)
-		//default:
-		//}
 	}
 }
 
 func (sim *Simulation) update() {
 	utils.LogInfo.Println("Updating simulation")
 
-	for _, snakeInst := range sim.Snakes {
-		if snakeInst.CheckLife {
-			snakeInst.MovementAlgorithm.Move(snakeInst, sim.Food.Food)
-			snakeInst.Update(sim.Food)
+	for _, snakeInstance := range sim.Snakes {
+		if snakeInstance.CheckLife {
+			snakeInstance.MovementAlgorithm.Move(snakeInstance, sim.Food.Food)
+			snakeInstance.Update(sim.Food)
+			sim.checkCollisionsForSnake(snakeInstance)
 		} else {
-			snakeInst.Die()
+			utils.LogInfo.Printf("Snake at (%d, %d) is dead and will be removed", snakeInstance.Body[0].X, snakeInstance.Body[0].Y)
+			sim.RemoveSnake(snakeInstance)
 		}
 	}
-
-	sim.checkCollisions()
 }
 
-func (sim *Simulation) checkCollisions() {
-	utils.LogInfo.Println("Checking collisions")
-
-	for _, snakeInst := range sim.Snakes {
-		if !snakeInst.CheckLife {
+func (sim *Simulation) checkCollisionsForSnake(snakeInst *BaseSnake) {
+	for _, otherSnake := range sim.Snakes {
+		if snakeInst == otherSnake || !otherSnake.CheckLife {
 			continue
 		}
 
-		for _, otherSnake := range sim.Snakes {
-			if snakeInst != otherSnake && otherSnake.CheckLife {
-				if snakeInst.CollidesWith(otherSnake) {
-					if snakeInst.CollidesHeadWith(otherSnake) {
-						snakeInst.TurnBodyToFood(sim.Food)
-						snakeInst.Die()
-						otherSnake.TurnBodyToFood(sim.Food)
-						otherSnake.Die()
-					} else if snakeInst.Length() > otherSnake.Length() {
-						snakeInst.Eat(otherSnake)
-						otherSnake.Die()
-					}
-				}
+		if snakeInst.CollidesWith(otherSnake) {
+			utils.LogInfo.Printf("Collision detected between snakes at (%d, %d) and (%d, %d)", snakeInst.Body[0].X, snakeInst.Body[0].Y, otherSnake.Body[0].X, otherSnake.Body[0].Y)
+			if snakeInst.CollidesHeadWith(otherSnake) {
+				snakeInst.Die()
+				otherSnake.Die()
+			} else if snakeInst.Length() > otherSnake.Length() {
+				snakeInst.Eat(otherSnake)
+				otherSnake.Die()
 			}
 		}
 	}

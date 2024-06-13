@@ -6,7 +6,6 @@ import (
 )
 
 type BaseSnake struct {
-	//base.BaseSnake
 	Body              []utils.Point
 	Direction         utils.Point
 	Color             termbox.Attribute
@@ -28,6 +27,7 @@ func NewSnake(x, y int, color termbox.Attribute, algorithm Algorithm, sim *Simul
 
 func (s *BaseSnake) Update(food *Manager) {
 	if !s.CheckLife {
+		utils.LogInfo.Printf("Snake at (%d, %d) is dead and should not update", s.Body[0].X, s.Body[0].Y)
 		return
 	}
 
@@ -51,11 +51,11 @@ func (s *BaseSnake) Update(food *Manager) {
 	// Проверка на столкновение с собой
 	for _, p := range s.Body {
 		if p.X == newHead.X && p.Y == newHead.Y {
-			s.TurnBodyToFood(food)
-			s.CheckLife = false
+			s.Die()
 			return
 		}
 	}
+
 	if food.Eat(newHead, s.Simulation.Snakes) {
 		s.Body = append([]utils.Point{newHead}, s.Body...)
 	} else {
@@ -148,6 +148,8 @@ func (s *BaseSnake) Eat(other *BaseSnake) {
 
 func (s *BaseSnake) Die() {
 	s.CheckLife = false
+	utils.LogInfo.Printf("Snake at (%d, %d) died", s.Body[0].X, s.Body[0].Y)
+	s.Simulation.RemoveSnake(s)
 }
 
 func (s *BaseSnake) TurnBodyToFood(food *Manager) {
