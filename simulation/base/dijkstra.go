@@ -7,7 +7,7 @@ import (
 
 type DijkstraMovement struct{}
 
-func (d *DijkstraMovement) Move(snake *BaseSnake, foods []*utils.Point) {
+func (d *DijkstraMovement) Move(snake *BaseSnake, foods []*utils.Point, sim *Simulation) {
 	if len(foods) == 0 {
 		return // Если нет еды, ничего не делаем
 	}

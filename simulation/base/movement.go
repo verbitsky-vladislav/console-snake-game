@@ -6,27 +6,13 @@ import (
 )
 
 type Algorithm interface {
-	Move(snake *BaseSnake, food []*utils.Point)
+	Move(snake *BaseSnake, food []*utils.Point, simulation *Simulation)
 }
-
-type AlgorithmType int
-
-const (
-	//AStar AlgorithmType = iota
-	Dijkstra AlgorithmType = iota
-	//Wavefront
-	//Pathfinding
-	//Navmesh
-	//Hierarchical
-	//ObstacleAvoidance
-	//DivideAndConquer
-	//KreisTurn
-)
 
 var MovementAlgorithms = []Algorithm{
 	//&AStarMovement{},
 	&DijkstraMovement{},
-	//&WavefrontMovement{},
+	//&WaveMovement{},
 	//&PathfindingMovement{},
 	//&NavmeshMovement{},
 	//&HierarchicalMovement{},
