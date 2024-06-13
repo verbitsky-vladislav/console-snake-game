@@ -2,7 +2,6 @@ package base
 
 import (
 	"github.com/nsf/termbox-go"
-	"math/rand"
 	"snake-game/utils"
 )
 
@@ -74,50 +73,50 @@ func (s *BaseSnake) Reproduce() {
 	utils.LogInfo.Println("Reproducing snake")
 
 	//newX, newY := s.calculateReproductionPosition()
-	screenWidth, screenHeight := termbox.Size()
-	utils.LogInfo.Printf("New snake position: (%d, %d)\n", screenWidth/2, screenHeight/2)
+	newX, newY := termbox.Size()
+	utils.LogInfo.Printf("New snake position: (%d, %d)\n", newX/2, newY/2)
 
-	newSnake := NewSnake(screenWidth/2, screenHeight/2, s.Color, s.MovementAlgorithm, s.Simulation)
+	newSnake := NewSnake(newX/2, newY/2, s.Color, s.MovementAlgorithm, s.Simulation)
 	newSnake.Direction = s.Direction
-	newSnake.Body = make([]utils.Point, len(s.Body))
-	copy(newSnake.Body, s.Body)
-	s.Simulation.AddSnake(newSnake)
 
-	// Уменьшаем длину родительской змейки
+	newSnake.Body = []utils.Point{{X: newX, Y: newY}}
+
 	s.Body = s.Body[:2]
+
+	s.Simulation.AddSnake(newSnake)
 
 	utils.LogInfo.Println("Snake reproduced")
 }
 
-func (s *BaseSnake) calculateReproductionPosition() (int, int) {
-	utils.LogInfo.Println("Calculating reproduction position")
-
-	s.Simulation.Mu.Lock()
-	defer s.Simulation.Mu.Unlock()
-
-	screenWidth, screenHeight := termbox.Size()
-	newX, newY := s.Body[0].X, s.Body[0].Y
-
-	// Определяем новую позицию за пределами области, занимаемой родительской змеей
-	for i := 0; i < 10; i++ { // Пытаемся найти новую позицию не более 10 раз
-		newX = utils.ClampInt(newX+rand.Intn(3)-1, 1, screenWidth-2)
-		newY = utils.ClampInt(newY+rand.Intn(3)-1, 1, screenHeight-2)
-		if !s.positionOccupied(newX, newY) { // Проверяем, не занята ли новая позиция другой змеёй
-			break
-		}
-	}
-
-	utils.LogInfo.Printf("New position: (%d, %d)\n", newX, newY)
-
-	// Устанавливаем случайное направление для новой змейки
-	directions := []utils.Point{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
-	newDirection := directions[rand.Intn(len(directions))]
-
-	// Применяем новое направление к новой змейке
-	s.Direction = newDirection
-
-	return newX, newY
-}
+//func (s *BaseSnake) calculateReproductionPosition() (int, int) {
+//	utils.LogInfo.Println("Calculating reproduction position")
+//
+//	s.Simulation.Mu.Lock()
+//	defer s.Simulation.Mu.Unlock()
+//
+//	screenWidth, screenHeight := termbox.Size()
+//	newX, newY := s.Body[0].X, s.Body[0].Y
+//
+//	// Определяем новую позицию за пределами области, занимаемой родительской змеей
+//	for i := 0; i < 10; i++ { // Пытаемся найти новую позицию не более 10 раз
+//		newX = utils.ClampInt(newX+rand.Intn(3)-1, 1, screenWidth-2)
+//		newY = utils.ClampInt(newY+rand.Intn(3)-1, 1, screenHeight-2)
+//		if !s.positionOccupied(newX, newY) { // Проверяем, не занята ли новая позиция другой змеёй
+//			break
+//		}
+//	}
+//
+//	utils.LogInfo.Printf("New position: (%d, %d)\n", newX, newY)
+//
+//	// Устанавливаем случайное направление для новой змейки
+//	directions := []utils.Point{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
+//	newDirection := directions[rand.Intn(len(directions))]
+//
+//	// Применяем новое направление к новой змейке
+//	s.Direction = newDirection
+//
+//	return newX, newY
+//}
 
 func (s *BaseSnake) positionOccupied(x, y int) bool {
 	for _, snake := range s.Simulation.Snakes {

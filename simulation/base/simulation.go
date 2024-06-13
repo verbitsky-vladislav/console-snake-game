@@ -62,17 +62,17 @@ func (sim *Simulation) Start() {
 func (sim *Simulation) AddSnake(newSnake *BaseSnake) {
 	utils.LogInfo.Println("Attempting to add a new snake")
 
-	sim.Mu.Lock()
-	defer sim.Mu.Unlock()
+	//sim.Mu.Lock()
+	//defer sim.Mu.Unlock()
 
 	// Запускаем обновление новой змеи в отдельной горутине перед добавлением в список
-	go func() {
-		for range time.Tick(100 * time.Millisecond) {
-			sim.Mu.Lock()
-			newSnake.Update(sim.Food)
-			sim.Mu.Unlock()
-		}
-	}()
+	//go func() {
+	//	for range time.Tick(100 * time.Millisecond) {
+	//		sim.Mu.Lock()
+	//		newSnake.Update(sim.Food)
+	//		sim.Mu.Unlock()
+	//	}
+	//}()
 
 	// Добавляем новую змею к симуляции напрямую
 	sim.Snakes = append(sim.Snakes, newSnake)
@@ -89,12 +89,12 @@ func (sim *Simulation) gameLoop() {
 		sim.Mu.Unlock()
 
 		// Обработка канала для добавления новых змей
-		select {
-		case newSnake := <-sim.newSnakeCh:
-			utils.LogInfo.Println("New snake added from channel to list")
-			sim.Snakes = append(sim.Snakes, newSnake)
-		default:
-		}
+		//select {
+		//case newSnake := <-sim.newSnakeCh:
+		//	utils.LogInfo.Println("New snake added from channel to list")
+		//	sim.Snakes = append(sim.Snakes, newSnake)
+		//default:
+		//}
 	}
 }
 
